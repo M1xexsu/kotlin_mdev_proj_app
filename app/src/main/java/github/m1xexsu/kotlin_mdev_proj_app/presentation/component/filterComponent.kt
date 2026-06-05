@@ -1,5 +1,10 @@
 package github.m1xexsu.kotlin_mdev_proj_app.presentation.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,100 +36,108 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterComponent(
-
+    isVisible: Boolean,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    points: List<Pair<Int, String>>,
+    onPointSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    var _expanded by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableIntStateOf(2) }
     val options = listOf("Низкая", "Средняя", "Все")
 
-    var searchQuery by remember { mutableStateOf("") }
-    val allPoints = listOf("Университет", "Воробьёвы Горы") //TODO: ИЗМЕНИТЬ НА ВНЕШНИЕ ЛИСТЫ
+    var isMenuExpanded by remember { mutableStateOf(false) }
 
-    val filteredPoints = remember(searchQuery) {
-        allPoints.filter { it.contains(searchQuery, ignoreCase = true) }
+    val filteredPoints = remember(searchQuery, points) {
+        points.filter { it.second.contains(searchQuery, ignoreCase = true) }
     }
 
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = RoundedCornerShape(36.dp),
-        modifier = Modifier
-            .systemBarsPadding()
-            .padding(start = 24.dp, end = 24.dp)
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically()
     ) {
-        Column(
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = RoundedCornerShape(36.dp),
+            modifier = modifier
+                .systemBarsPadding()
+                .padding(start = 24.dp, end = 24.dp)
         ) {
-            Text(
-                text = "Загруженность",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
-            )
-
-            SingleChoiceSegmentedButtonRow(
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
             ) {
-                options.forEachIndexed { index, label ->
-                    SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = options.size
-                        ),
-                        onClick = { selectedIndex = index },
-                        selected = index == selectedIndex,
-                        label = {
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.padding(4.dp))
-
-            Text(
-                text = "Конечная точка",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
-            )
-
-            ExposedDropdownMenuBox(
-                expanded = _expanded,
-                onExpandedChange = { _expanded = it },
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-            ) {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { 
-                        searchQuery = it
-                        _expanded = true
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(),
-                    label = { Text("Поиск точки") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = _expanded) },
-                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                    singleLine = true
+                Text(
+                    text = "Загруженность",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
                 )
 
-                if (filteredPoints.isNotEmpty()) {
-                    ExposedDropdownMenu(
-                        expanded = _expanded,
-                        onDismissRequest = { _expanded = false }
-                    ) {
-                        filteredPoints.forEach { point ->
-                            DropdownMenuItem(
-                                text = { Text(point) },
-                                onClick = {
-                                    searchQuery = point
-                                    _expanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
+                SingleChoiceSegmentedButtonRow(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    options.forEachIndexed { index, label ->
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = index,
+                                count = options.size
+                            ),
+                            onClick = { selectedIndex = index },
+                            selected = index == selectedIndex,
+                            label = {
+                                Text(
+                                    text = label,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.padding(4.dp))
+
+                Text(
+                    text = "Конечная точка",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
+                )
+
+                ExposedDropdownMenuBox(
+                    expanded = isMenuExpanded,
+                    onExpandedChange = { isMenuExpanded = it },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = {
+                            onSearchQueryChange(it)
+                            isMenuExpanded = true
+                        },
+                        modifier = Modifier.fillMaxWidth().menuAnchor(),
+                        label = { Text("Поиск точки") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isMenuExpanded) },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                        singleLine = true
+                    )
+
+                    if (filteredPoints.isNotEmpty()) {
+                        ExposedDropdownMenu(
+                            expanded = isMenuExpanded,
+                            onDismissRequest = { isMenuExpanded = false }
+                        ) {
+                            filteredPoints.forEach { point ->
+                                DropdownMenuItem(
+                                    text = { Text(point.second) },
+                                    onClick = {
+                                        onSearchQueryChange(point.second)
+                                        onPointSelected(point.first)
+                                        isMenuExpanded = false
+                                    },
+                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                )
+                            }
                         }
                     }
                 }
@@ -133,8 +146,20 @@ fun FilterComponent(
     }
 }
 
+
+
 @Preview(showSystemUi = true)
 @Composable
 fun PreviewFilterComponent() {
-    FilterComponent()
+    FilterComponent(
+        isVisible = true, // В превью ставим true для отображения
+        searchQuery = "",
+        onSearchQueryChange = {},
+        points = listOf(
+            Pair(1, "Библиотека"),
+            Pair(2, "Столовая"),
+            Pair(3, "Корпус А")
+        ),
+        onPointSelected = {}
+    )
 }

@@ -1,6 +1,5 @@
 package github.m1xexsu.kotlin_mdev_proj_app.data.remote
 
-import android.view.PixelCopy.request
 import github.m1xexsu.kotlin_mdev_proj_app.data.model.arriveDTO
 import github.m1xexsu.kotlin_mdev_proj_app.data.model.stationDTO
 import github.mixexsu.application.dtos.userDTO
@@ -9,30 +8,26 @@ import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.websocket.WebSocketDeflateExtension.Companion.install
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 
 var serverlink = "http://10.0.2.2:8080/"
 
 object KtorClient {
-    private var accesstoken: String? = null
+    var accessToken: String? = null
     private val client = HttpClient(OkHttp)
     {
-        install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
+        install(ContentNegotiation) {
             json(Json{
                 ignoreUnknownKeys = true
                 isLenient = true
@@ -45,7 +40,7 @@ object KtorClient {
         install(Auth)
         {
             bearer {
-                loadTokens { accesstoken?.let {
+                loadTokens { accessToken?.let {
                         BearerTokens(
                             accessToken = it,
                             refreshToken = ""
@@ -84,7 +79,7 @@ object KtorClient {
     suspend fun login (
         username: String,
         password: String
-    )
+    ): userDTO
     {
         return client.post(serverlink + "auth/login")
         {
@@ -95,7 +90,7 @@ object KtorClient {
                     "password" to password
                 )
             )
-        }.body()
+        }.body<userDTO>()
     }
 
 
@@ -104,10 +99,10 @@ object KtorClient {
     {
         val ans =  client.post(serverlink + "auth/logout")
         {
-            header(HttpHeaders.Authorization, "Bearer $accesstoken")
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
             header(HttpHeaders.ContentType, ContentType.Application.Json)
         }
-        accesstoken = null
+        accessToken = null
         return ans.body()
     }
 
@@ -117,7 +112,7 @@ object KtorClient {
     {
         return client.post(serverlink + "admin/bus")
         {
-            header(HttpHeaders.Authorization, "Bearer $accesstoken")
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             setBody(
                 mapOf(
@@ -133,7 +128,7 @@ object KtorClient {
     {
         return client.post(serverlink + "admin/station")
         {
-            header(HttpHeaders.Authorization, "Bearer $accesstoken")
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             setBody(
                 mapOf(
@@ -147,7 +142,7 @@ object KtorClient {
     {
         return client.post(serverlink + "admin/arrive")
         {
-            header(HttpHeaders.Authorization, "Bearer $accesstoken")
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             setBody(
                 mapOf(
