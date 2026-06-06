@@ -68,7 +68,7 @@ fun Navigation(navController: NavHostController = rememberNavController()) {
                     getarrivesortusecase = getArriveSortUseCase
                 )
             }
-            MainScreen(mainscreenviewmodel)
+            MainScreen(mainscreenviewmodel, navController)
         }
 
         composable(Screen.AddScreen.route) {

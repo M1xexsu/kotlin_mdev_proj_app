@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class userDTO(
     val token: String,
     val message: String,
-    val user_id: Int
+    val userId: Int
     )

@@ -18,6 +18,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import github.m1xexsu.kotlin_mdev_proj_app.presentation.component.ArriveComponent
 import github.m1xexsu.kotlin_mdev_proj_app.presentation.component.FilterComponent
 import github.m1xexsu.kotlin_mdev_proj_app.presentation.component.SearchComponent
@@ -28,7 +29,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(viewModel: mainscreenviewmodel) {
+fun MainScreen(viewModel: mainscreenviewmodel, navcontroller: NavHostController) {
 	val coroutineScope = rememberCoroutineScope()
 	var searchQuery by remember { mutableStateOf("") }
 	var filterQuery by remember { mutableStateOf("") }
@@ -68,7 +69,7 @@ fun MainScreen(viewModel: mainscreenviewmodel) {
 				onPointSelected = { stationId ->
 					coroutineScope.launch { viewModel.loadArrivals(stationId) }
 				},
-				onFilterClick = { showFilter = !showFilter },
+				onFilterClick = { navcontroller.navigate("settings_screen") },
 				isExpanded = showSearchResults,
 				onExpandedChange = { showSearchResults = it }
 			)

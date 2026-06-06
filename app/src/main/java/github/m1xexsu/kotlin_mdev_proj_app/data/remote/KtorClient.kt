@@ -21,7 +21,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 
-var serverlink = "http://10.0.2.2:8080/"
+var serverlink = "http://192.168.1.110:8080/"
 
 object KtorClient {
     var accessToken: String? = null
