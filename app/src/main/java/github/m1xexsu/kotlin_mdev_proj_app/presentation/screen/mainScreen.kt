@@ -3,6 +3,7 @@ package github.m1xexsu.kotlin_mdev_proj_app.presentation.screen
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import github.m1xexsu.kotlin_mdev_proj_app.presentation.component.ArriveComponent
 import github.m1xexsu.kotlin_mdev_proj_app.presentation.component.FilterComponent
-import github.m1xexsu.kotlin_mdev_proj_app.presentation.component.SearchComponent
 import github.m1xexsu.kotlin_mdev_proj_app.presentation.component.TopbarComponent
 import github.m1xexsu.kotlin_mdev_proj_app.presentation.viewmodel.mainscreenviewmodel
 import kotlinx.coroutines.launch
@@ -35,7 +35,7 @@ fun MainScreen(viewModel: mainscreenviewmodel, navcontroller: NavHostController)
 	var filterQuery by remember { mutableStateOf("") }
 	var showFilter by remember { mutableStateOf(false) }
 	var showSearchResults by remember { mutableStateOf(false) }
-	val titleState = remember { mutableStateOf("Маршруты") }
+	val titleStateId = remember { mutableStateOf(0) }
 
 	LaunchedEffect(Unit) {
 		viewModel.loadStations()
@@ -48,9 +48,20 @@ fun MainScreen(viewModel: mainscreenviewmodel, navcontroller: NavHostController)
 	Scaffold(
 		topBar = {
 			TopbarComponent(
-				text = titleState,
-				triggersearch = { showSearchResults = !showSearchResults },
-				triggerfilter = { showFilter = !showFilter }
+				triggerfilter = { showFilter = !showFilter },
+				query = searchQuery,
+				onQueryChange = {
+					searchQuery = it
+					showSearchResults = true
+				},
+				points = points,
+				onPointSelected = { stationId ->
+					titleStateId.value = stationId
+					coroutineScope.launch { viewModel.loadArrivals(stationId) }
+				},
+				isExpanded = showSearchResults,
+				onExpandedChange = { showSearchResults = it },
+				modifier = Modifier.systemBarsPadding().padding(16.dp)
 			)
 		}
 	) { paddingValues ->
@@ -59,29 +70,15 @@ fun MainScreen(viewModel: mainscreenviewmodel, navcontroller: NavHostController)
 				.fillMaxSize()
 				.padding(paddingValues)
 		) {
-			SearchComponent(
-				query = searchQuery,
-				onQueryChange = {
-					searchQuery = it
-					showSearchResults = true
-				},
-				points = points,
-				onPointSelected = { stationId ->
-					coroutineScope.launch { viewModel.loadArrivals(stationId) }
-				},
-				onFilterClick = { navcontroller.navigate("settings_screen") },
-				isExpanded = showSearchResults,
-				onExpandedChange = { showSearchResults = it }
-			)
-
 			FilterComponent(
 				isVisible = showFilter,
 				searchQuery = filterQuery,
 				onSearchQueryChange = { filterQuery = it },
 				points = points,
 				onPointSelected = { stationId ->
-					coroutineScope.launch { viewModel.loadArrivals(stationId) }
-				}
+					coroutineScope.launch { viewModel.loadSortedArrivals(titleStateId.value, stationId) }
+				},
+				settingsjump = { navcontroller.navigate("settings_screen") }
 			)
 
 			if (viewModel.arrivals.isEmpty()) {

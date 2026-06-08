@@ -29,15 +29,31 @@ class addscreenviewmodel(
         private set
 
     suspend fun loadStations() {
-        stations = getstationsusecase()
+        try
+        {
+            stations = getstationsusecase()
+        }
+        catch (e: Exception)
+        {
+            stations = emptyList()
+        }
     }
 
     suspend fun loadArrivals(stationId: Int) {
-        arrivals = getarrivereusecase(stationId)
+        try {
+            arrivals = getarrivereusecase(stationId)
+        } catch (e: Exception) {
+            arrivals = emptyList()
+        }
+
     }
 
     suspend fun loadSortedArrivals(stationId: Int, destinationId: Int) {
-        arrivals = getarrivesortusecase(stationId, destinationId)
+        try {
+            arrivals = getarrivesortusecase(stationId, destinationId)
+        } catch (e: Exception) {
+            arrivals = emptyList()
+        }
     }
 
     suspend fun addBus(busname: String, startstation: Int, endstation: Int) {

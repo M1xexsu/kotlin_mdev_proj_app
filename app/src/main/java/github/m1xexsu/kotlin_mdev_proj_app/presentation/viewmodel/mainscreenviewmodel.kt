@@ -32,18 +32,29 @@ class mainscreenviewmodel(
         private set
 
     suspend fun loadStations() {
-        stations = getstationsusecase()
+        try {
+            stations = getstationsusecase()
+        } catch (e: Exception) {
+            stations = emptyList()
+        }
     }
 
     suspend fun loadArrivals(stationId: Int) {
         selectedStationId = stationId
-        arrivals = getarrivereusecase(stationId)
+        try {
+            arrivals = getarrivereusecase(stationId)
+        } catch (e: Exception) {
+            arrivals = emptyList()
+        }
     }
 
     suspend fun loadSortedArrivals(stationId: Int, destinationId: Int) {
         selectedStationId = stationId
         selectedDestinationId = destinationId
-        arrivals = getarrivesortusecase(stationId, destinationId)
+        try {
+            arrivals = getarrivesortusecase(stationId, destinationId)
+        } catch (e: Exception) {
+            arrivals = emptyList()
+        }
     }
-
 }

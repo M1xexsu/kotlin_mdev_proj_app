@@ -19,15 +19,26 @@ class settingsscreenviewmodel(
         private set
 
     suspend fun login(username: String, password: String) {
-        loginusecase(username, password)
-        isLoggedIn = true
-        statusText = "Вход выполнен"
+        try {
+            statusText = "Вход..."
+            loginusecase(username, password)
+            isLoggedIn = true
+            statusText = "Вход выполнен"
+        } catch (e: Exception) {
+            isLoggedIn = false
+            statusText = "Ошибка: ${e.localizedMessage ?: "Не удалось подключиться к серверу"}"
+        }
     }
 
     suspend fun logout() {
-        logoutusecase()
-        isLoggedIn = false
-        statusText = "Выход выполнен"
+        try {
+            logoutusecase()
+            statusText = "Выход выполнен"
+        } catch (e: Exception) {
+            statusText = "Ошибка при выходе: ${e.localizedMessage}"
+        } finally {
+            isLoggedIn = false
+        }
     }
 
 }
