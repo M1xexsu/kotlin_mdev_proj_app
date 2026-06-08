@@ -36,6 +36,7 @@ fun MainScreen(viewModel: mainscreenviewmodel, navcontroller: NavHostController)
 	var showFilter by remember { mutableStateOf(false) }
 	var showSearchResults by remember { mutableStateOf(false) }
 	val titleStateId = remember { mutableStateOf(0) }
+	val filterscore = remember { mutableStateOf(0) }
 
 	LaunchedEffect(Unit) {
 		viewModel.loadStations()
@@ -78,7 +79,8 @@ fun MainScreen(viewModel: mainscreenviewmodel, navcontroller: NavHostController)
 				onPointSelected = { stationId ->
 					coroutineScope.launch { viewModel.loadSortedArrivals(titleStateId.value, stationId) }
 				},
-				settingsjump = { navcontroller.navigate("settings_screen") }
+				settingsjump = { navcontroller.navigate("settings_screen") },
+				filterscore = filterscore
 			)
 
 			if (viewModel.arrivals.isEmpty()) {
@@ -97,7 +99,8 @@ fun MainScreen(viewModel: mainscreenviewmodel, navcontroller: NavHostController)
 							load = arrive.load,
 							arrivetime = remember { androidx.compose.runtime.mutableIntStateOf(0) },
 							starttime = arrive.arrive_start,
-							endtime = arrive.arrive_end
+							endtime = arrive.arrive_end,
+							filterscore = filterscore
 						)
 					}
 				}

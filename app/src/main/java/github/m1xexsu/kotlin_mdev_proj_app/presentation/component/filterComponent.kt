@@ -26,6 +26,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -46,7 +47,8 @@ fun FilterComponent(
     points: List<Pair<Int, String>>,
     onPointSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    settingsjump: () -> Unit
+    settingsjump: () -> Unit,
+    filterscore: MutableState<Int>
 ) {
     var selectedIndex by remember { mutableIntStateOf(2) }
     val options = listOf("Низкая", "Средняя", "Все")
@@ -88,7 +90,14 @@ fun FilterComponent(
                                 index = index,
                                 count = options.size
                             ),
-                            onClick = { selectedIndex = index },
+                            onClick = { selectedIndex = index
+                                        when(index)
+                                        {
+                                            0 -> filterscore.value = 50
+                                            1 -> filterscore.value = 70
+                                            2 -> filterscore.value = 100
+                                        }
+                                      },
                             selected = index == selectedIndex,
                             label = {
                                 Text(
@@ -181,6 +190,7 @@ fun PreviewFilterComponent() {
             Pair(3, "Корпус А")
         ),
         onPointSelected = {},
-        settingsjump = {}
+        settingsjump = {},
+        filterscore = remember { mutableStateOf(0) }
     )
 }
